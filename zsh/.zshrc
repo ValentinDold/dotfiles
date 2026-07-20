@@ -56,7 +56,7 @@ function o() { xdg-open $1 &> /dev/null &}
 alias up="sudo pacman -Syu --noconfirm && flatpak update -y"
 alias fpi="flatpak remote-ls --app --columns=application | fzf -m | xargs -ro flatpak install"
 alias fpr="flatpak list --app --columns=application | fzf --multi | xargs -ro flatpak remove --delete-data"
-alias pi='pacman -Slq | fzf --multi --preview "pacman -Si {1}" | xargs -ro sudo pacman -S'
+alias pic='pacman -Slq | fzf --multi --preview "pacman -Si {1}" | xargs -ro sudo pacman -S'
 alias pr='pacman -Qq | fzf --multi --preview "pacman -Qi {1}" | xargs -ro sudo pacman -Rns'
 
 # git aliases
@@ -83,3 +83,4 @@ bindkey "^[[B" down-line-or-beginning-search
 
 # exports 
 export PATH="$HOME/.local/bin:$PATH"
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"

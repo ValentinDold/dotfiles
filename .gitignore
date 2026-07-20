@@ -1,0 +1,6 @@
+# Pi credentials and machine-local/generated state
+pi/.pi/agent/auth.json
+pi/.pi/agent/models-store.json
+pi/.pi/agent/sessions/
+pi/.pi/agent/git/
+pi/.pi/agent/npm/

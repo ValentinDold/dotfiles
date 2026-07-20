@@ -5,7 +5,7 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STOW_PACKAGES=(zsh tmux nvim)
+STOW_PACKAGES=(zsh tmux nvim pi)
 SSH_KEY="$HOME/.ssh/id_ed25519"
 
 log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
@@ -40,6 +40,11 @@ backup_if_real "$HOME/.p10k.zsh"
 backup_if_real "$HOME/.config/tmux"
 backup_if_real "$HOME/.config/nvim"
 backup_if_real "$HOME/.config/powerlevel10k"
+backup_if_real "$HOME/.pi/agent/settings.json"
+
+# Keep Pi credentials, sessions, and caches outside the dotfiles worktree.
+# Without this directory, Stow may fold ~/.pi into the pi package.
+mkdir -p "$HOME/.pi/agent"
 
 log "Stowing packages: ${STOW_PACKAGES[*]}"
 stow -d "$DOTFILES_DIR" -t "$HOME" -R "${STOW_PACKAGES[@]}"

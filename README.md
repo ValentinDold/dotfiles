@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal configuration for zsh, tmux, and Neovim, managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Personal configuration for zsh, tmux, Neovim, and Pi, managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
 Each top-level directory is a stow package whose contents mirror `$HOME`:
 
@@ -9,6 +9,11 @@ Each top-level directory is a stow package whose contents mirror `$HOME`:
 | `zsh`   | `~/.zshrc`, `~/.p10k.zsh`, `~/.config/powerlevel10k` (submodule) |
 | `tmux`  | `~/.config/tmux` |
 | `nvim`  | `~/.config/nvim` (plugins via lazy.nvim, pinned in `lazy-lock.json`) |
+| `pi`    | `~/.pi/agent/settings.json` |
+
+Only Pi's portable configuration is tracked. Credentials (`auth.json`), sessions,
+model caches, and installed package caches remain local and are ignored by Git.
+After restoring on a new machine, use Pi's `/login` command to authenticate again.
 
 ## Setup on a new machine
 
@@ -41,7 +46,8 @@ It is idempotent, so it can be re-run safely.
    ```sh
    git clone --recurse-submodules git@github.com:ValentinDold/dotfiles.git ~/repos/dotfiles
    cd ~/repos/dotfiles
-   stow -t ~ nvim tmux zsh
+   mkdir -p ~/.pi/agent  # prevent Stow from placing Pi's local state in this repo
+   stow -t ~ nvim tmux zsh pi
    ```
 
    If a real file already exists where a symlink should go (e.g. a default
