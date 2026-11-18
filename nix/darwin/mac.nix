@@ -22,7 +22,7 @@
 
   homebrew = {
     enable = true;
-    casks = [ "firefox" "signal" "spotify"];
+    casks = [ "firefox" "signal" "spotify" "syncthing-app"];
     onActivation.cleanup = "uninstall";
   };
 }
