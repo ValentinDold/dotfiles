@@ -22,7 +22,7 @@
 
   homebrew = {
     enable = true;
-    casks = [ "firefox" ];
+    casks = [ "firefox" "signal" "spotify"];
     onActivation.cleanup = "uninstall";
   };
 }
