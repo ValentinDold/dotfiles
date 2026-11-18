@@ -6,7 +6,7 @@
 
   environment.systemPackages = with pkgs; [
     git gh stow aerospace
-    tmux neovim lazygit nodejs lima
+    tmux neovim lazygit nodejs lima uv
     zoxide fzf fd tree
     zsh-autosuggestions zsh-syntax-highlighting
   ];
@@ -20,9 +20,15 @@
   # your .zshrc runs compinit itself; avoid running it twice
   programs.zsh.enableCompletion = false;
 
+  system.defaults.dock = {
+    minimize-to-application = true;   # minimized windows go into the app icon
+    persistent-others = [ ];          # no folders like Downloads
+    show-recents = false;             # no recently used apps
+  };
+
   homebrew = {
     enable = true;
-    casks = [ "firefox" "signal" "spotify" "syncthing-app"];
+    casks = [ "firefox" "anki" "signal" "spotify" "syncthing-app"];
     onActivation.cleanup = "uninstall";
   };
 }
