@@ -20,7 +20,7 @@ case "$OS" in
     STOW_PACKAGES=(zsh tmux nvim pi)
 
     log "Installing packages"
-    sudo pacman -S --needed --noconfirm \
+    sudo pacman -Syu --needed --noconfirm \
       git stow zsh tmux neovim openssh github-cli \
       zoxide fzf zsh-autosuggestions zsh-syntax-highlighting \
       fd tree trash-cli lazygit flatpak
