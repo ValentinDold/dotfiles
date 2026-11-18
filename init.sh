@@ -1,26 +1,58 @@
 #!/usr/bin/env bash
 # Bootstrap a new machine: install packages, stow the dotfiles,
 # generate an SSH key and register it with GitHub.
-# Idempotent — safe to re-run.
+# Supports Arch (pacman) and macOS (nix-darwin). Idempotent — safe to re-run.
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STOW_PACKAGES=(zsh tmux nvim pi)
 SSH_KEY="$HOME/.ssh/id_ed25519"
+OS="$(uname)"
 
 log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 
 # --- packages ---------------------------------------------------------------
-if ! command -v pacman &>/dev/null; then
-  echo "This script currently only supports Arch (pacman not found)." >&2
-  exit 1
-fi
+case "$OS" in
+  Linux)
+    if ! command -v pacman &>/dev/null; then
+      echo "On Linux this script only supports Arch (pacman not found)." >&2
+      exit 1
+    fi
+    STOW_PACKAGES=(zsh tmux nvim pi)
 
-log "Installing packages"
-sudo pacman -S --needed --noconfirm \
-  git stow zsh tmux neovim openssh github-cli \
-  zoxide fzf zsh-autosuggestions zsh-syntax-highlighting \
-  fd tree trash-cli lazygit flatpak
+    log "Installing packages"
+    sudo pacman -S --needed --noconfirm \
+      git stow zsh tmux neovim openssh github-cli \
+      zoxide fzf zsh-autosuggestions zsh-syntax-highlighting \
+      fd tree trash-cli lazygit flatpak
+    ;;
+  Darwin)
+    if ! command -v nix &>/dev/null; then
+      echo "Install Nix first: https://nixos.org/download" >&2
+      exit 1
+    fi
+    STOW_PACKAGES=(zsh tmux nvim aerospace)
+
+    # Homebrew itself is installed once; its casks are managed by nix-darwin.
+    if [[ ! -x /opt/homebrew/bin/brew ]]; then
+      log "Installing Homebrew"
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+
+    log "Applying nix-darwin config"
+    if command -v darwin-rebuild &>/dev/null; then
+      sudo darwin-rebuild switch --flake "$DOTFILES_DIR/nix#mac"
+    else
+      sudo nix --extra-experimental-features 'nix-command flakes' \
+        run nix-darwin/master#darwin-rebuild -- switch --flake "$DOTFILES_DIR/nix#mac"
+    fi
+    # Make the freshly installed tools (stow, gh, ...) available below.
+    export PATH="/run/current-system/sw/bin:$PATH"
+    ;;
+  *)
+    echo "Unsupported OS: $OS" >&2
+    exit 1
+    ;;
+esac
 
 # --- submodules -------------------------------------------------------------
 log "Initializing submodules"
@@ -40,11 +72,19 @@ backup_if_real "$HOME/.p10k.zsh"
 backup_if_real "$HOME/.config/tmux"
 backup_if_real "$HOME/.config/nvim"
 backup_if_real "$HOME/.config/powerlevel10k"
-backup_if_real "$HOME/.pi/agent/settings.json"
 
-# Keep Pi credentials, sessions, and caches outside the dotfiles worktree.
-# Without this directory, Stow may fold ~/.pi into the pi package.
-mkdir -p "$HOME/.pi/agent"
+# Make sure ~/.config is a real directory, so Stow never links the whole
+# folder into the repo.
+mkdir -p "$HOME/.config"
+
+if [[ "$OS" == Linux ]]; then
+  backup_if_real "$HOME/.pi/agent/settings.json"
+  # Keep Pi credentials, sessions, and caches outside the dotfiles worktree.
+  # Without this directory, Stow may fold ~/.pi into the pi package.
+  mkdir -p "$HOME/.pi/agent"
+else
+  backup_if_real "$HOME/.config/aerospace"
+fi
 
 log "Stowing packages: ${STOW_PACKAGES[*]}"
 stow -d "$DOTFILES_DIR" -t "$HOME" -R "${STOW_PACKAGES[@]}"
@@ -83,7 +123,8 @@ if [[ "$remote_url" == https://github.com/* ]]; then
 fi
 
 # --- login shell ------------------------------------------------------------
-if [[ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]]; then
+# macOS already uses zsh as the default shell.
+if [[ "$OS" == Linux && "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]]; then
   log "Making zsh the login shell"
   chsh -s "$(command -v zsh)"
 fi
