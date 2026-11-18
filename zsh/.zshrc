@@ -29,6 +29,14 @@ function fzf_zoxide() {
 }
 zle -N fzf_zoxide
 
+#lima selection
+function vm() {
+  local name="${1:-$(limactl list -q | fzf --select-1 --exit-0 --height=40%)}"
+  [[ -z "$name" ]] && { echo "no Lima VM found"; return 1; }
+  [[ "$(limactl list --format '{{.Status}}' "$name")" == Running ]] || limactl start "$name"
+  limactl shell "$name"
+}
+
 # Keybindings
 bindkey -e
 bindkey '^o' fzf_zoxide
