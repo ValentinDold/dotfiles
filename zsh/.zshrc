@@ -12,10 +12,15 @@ setopt share_history
 setopt hist_ignore_all_dups
 
 # Plugins
+if [[ "$OSTYPE" == darwin* ]]; then
+  ZSH_PLUGIN_DIR=/run/current-system/sw/share
+else
+  ZSH_PLUGIN_DIR=/usr/share/zsh/plugins
+fi
 source <(zoxide init zsh)
 source <(fzf --zsh)
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 # fzf-zoxide integration
 function fzf_zoxide() { 
@@ -40,7 +45,6 @@ alias cd="z"
 alias rm="trash"
 # alias rm="rm -I" # Commented out to prevent overriding trash-cli
 alias fd="fd --hidden --no-ignore"
-alias ls="ls --color=auto -1"
 alias ll="ls -Ahl"
 alias ..="cd .."
 alias ...="cd ../.."
@@ -48,16 +52,8 @@ alias ....="cd ../../.."
 alias .....="cd ../../../.."
 alias tree="tree -C -L 4"
 alias venv="source venv/bin/activate || python -m venv venv && source venv/bin/activate"
-alias restow="(cd ~/dotfiles && stow -vt ~ zsh)"
+alias restow="(cd ~/repos/dotfiles && stow -vt ~ zsh)"
 function md() { mkdir "$1" && cd "$1" }
-function o() { xdg-open $1 &> /dev/null &}
-
-# Package Management Aliases
-alias up="sudo pacman -Syu --noconfirm && flatpak update -y"
-alias fpi="flatpak remote-ls --app --columns=application | fzf -m | xargs -ro flatpak install"
-alias fpr="flatpak list --app --columns=application | fzf --multi | xargs -ro flatpak remove --delete-data"
-alias pic='pacman -Slq | fzf --multi --preview "pacman -Si {1}" | xargs -ro sudo pacman -S'
-alias pr='pacman -Qq | fzf --multi --preview "pacman -Qi {1}" | xargs -ro sudo pacman -Rns'
 
 # git aliases
 alias gs="git status --short"
@@ -81,6 +77,23 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search
 bindkey "^[[B" down-line-or-beginning-search
 
-# exports 
+# OS-specific
+if [[ "$OSTYPE" == darwin* ]]; then
+  [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+  alias ls="ls -G -1"
+  function o() { open "$@" }
+  alias rebuild="sudo darwin-rebuild switch --flake ~/repos/dotfiles/nix#mac"
+  alias up="(cd ~/repos/dotfiles/nix && nix flake update) && rebuild"
+else
+  alias ls="ls --color=auto -1"
+  function o() { xdg-open $1 &> /dev/null & }
+  alias up="sudo pacman -Syu --noconfirm && flatpak update -y"
+  alias fpi="flatpak remote-ls --app --columns=application | fzf -m | xargs -ro flatpak install"
+  alias fpr="flatpak list --app --columns=application | fzf --multi | xargs -ro flatpak remove --delete-data"
+  alias pic='pacman -Slq | fzf --multi --preview "pacman -Si {1}" | xargs -ro sudo pacman -S'
+  alias pr='pacman -Qq | fzf --multi --preview "pacman -Qi {1}" | xargs -ro sudo pacman -Rns'
+  export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+fi
+
+# exports
 export PATH="$HOME/.local/bin:$PATH"
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"

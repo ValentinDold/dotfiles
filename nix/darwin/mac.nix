@@ -6,7 +6,19 @@
 
   environment.systemPackages = with pkgs; [
     git gh stow aerospace
+    tmux neovim lazygit
+    zoxide fzf fd tree
+    zsh-autosuggestions zsh-syntax-highlighting
   ];
+
+  # expose the zsh plugins under /run/current-system/sw/share
+  environment.pathsToLink = [
+    "/share/zsh-autosuggestions"
+    "/share/zsh-syntax-highlighting"
+  ];
+
+  # your .zshrc runs compinit itself; avoid running it twice
+  programs.zsh.enableCompletion = false;
 
   homebrew = {
     enable = true;
