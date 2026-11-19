@@ -6,7 +6,7 @@
 
   environment.systemPackages = with pkgs; [
     git gh stow aerospace
-    tmux neovim lazygit nodejs lima uv
+    tmux neovim lazygit nodejs lima llama-cpp uv
     zoxide fzf fd tree
     zsh-autosuggestions zsh-syntax-highlighting
   ];
