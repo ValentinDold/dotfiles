@@ -86,7 +86,7 @@
   # --- Homebrew apps --------------------------------------------------------------
   homebrew = {
     enable = true;
-    casks = [ "firefox" "anki" "signal" "spotify" "syncthing-app" ];
+    casks = [ "firefox" "iina" "anki" "signal" "spotify" "syncthing-app" ];
     onActivation.cleanup = "uninstall";
   };
 }
