@@ -26,6 +26,10 @@
     show-recents = false;             # no recently used apps
   };
 
+  system.defaults.WindowManager = {
+    EnableStandardClickToShowDesktop = false;
+  };
+
   homebrew = {
     enable = true;
     casks = [ "firefox" "anki" "signal" "spotify" "syncthing-app"];
